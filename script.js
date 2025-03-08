@@ -1,44 +1,49 @@
 document.getElementById("submit").addEventListener("click", function() {
-    let player1 = document.getElementById("player-1").value.trim();
-    let player2 = document.getElementById("player-2").value.trim();
+    let player1 = document.getElementById("player-1").value;
+    let player2 = document.getElementById("player-2").value;
     if (player1 && player2) {
-        document.querySelector(".input-section").style.display = "none";
-        document.querySelector(".game-section").style.display = "block";
-        document.querySelector(".message").textContent = `${player1}, you're up`;
+        document.getElementById("player-input").style.display = "none";
+        document.getElementById("board").style.display = "block";
+        document.getElementById("message").innerText = `${player1}, you're up`;
+        startGame(player1, player2);
     }
 });
 
-let cells = document.querySelectorAll(".cell");
-let currentPlayer = "X";
-let players = [];
-let gameActive = true;
+function startGame(player1, player2) {
+    let currentPlayer = player1;
+    let currentSymbol = "X";
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let cells = document.querySelectorAll(".cell");
+    let message = document.getElementById("message");
 
-cells.forEach(cell => {
-    cell.addEventListener("click", function() {
-        if (!players.length) {
-            players = [document.getElementById("player-1").value, document.getElementById("player-2").value];
-        }
-        if (cell.textContent === "" && gameActive) {
-            cell.textContent = currentPlayer;
-            if (checkWin()) {
-                document.querySelector(".message").textContent = `${players[currentPlayer === "X" ? 0 : 1]} congratulations you won!`;
-                gameActive = false;
-            } else {
-                currentPlayer = currentPlayer === "X" ? "O" : "X";
-                document.querySelector(".message").textContent = `${players[currentPlayer === "X" ? 0 : 1]}, you're up`;
+    cells.forEach((cell, index) => {
+        cell.addEventListener("click", function() {
+            if (board[index] === "") {
+                board[index] = currentSymbol;
+                cell.innerText = currentSymbol;
+                if (checkWinner(board, currentSymbol)) {
+                    message.innerText = `${currentPlayer}, congratulations you won!`;
+                    disableBoard();
+                    return;
+                }
+                currentPlayer = currentPlayer === player1 ? player2 : player1;
+                currentSymbol = currentSymbol === "X" ? "O" : "X";
+                message.innerText = `${currentPlayer}, you're up`;
             }
-        }
-    });
-});
-
-function checkWin() {
-    let winPatterns = [
-        [1, 2, 3], [4, 5, 6], [7, 8, 9],
-        [1, 4, 7], [2, 5, 8], [3, 6, 9],
-        [1, 5, 9], [3, 5, 7]
-    ];
-    return winPatterns.some(pattern => {
-        return pattern.every(id => document.getElementById(id).textContent === currentPlayer);
+        });
     });
 }
 
+function checkWinner(board, symbol) {
+    return [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6]
+    ].some(combination => {
+        return combination.every(index => board[index] === symbol);
+    });
+}
+
+function disableBoard() {
+    document.querySelectorAll(".cell").forEach(cell => cell.style.pointerEvents = "none");
+}
